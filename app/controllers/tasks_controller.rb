@@ -1,6 +1,6 @@
-class TasksController < BaseController
+  class TasksController < BaseController
     def index
-      tasks = Task.where({ project_id: params[:project_id] })
+      tasks = Task.where(find_params)
       render json: tasks
     end
   
@@ -14,9 +14,14 @@ class TasksController < BaseController
   
     private
   
+    def find_params
+      { project_id: params[:project_id] }.merge(
+        params[:status].present? && Task.validate_status(params[:status]) ? { status: params[:status] } : {}
+      )
+    end
+  
     def resource_params
       params.require(:task).permit(:name, :description, :status, :link).merge(project_id: params[:project_id])
     end
-  
   end
   
