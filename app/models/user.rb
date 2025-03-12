@@ -4,4 +4,7 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
+  def reset_token!
+    update(authentication_token: SecureRandom.hex(15))
+  end
 end

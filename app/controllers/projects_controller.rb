@@ -1,6 +1,6 @@
 class ProjectsController < BaseController
   def index
-    super && return unless params.key?(:task_status) || params.key?(:with_tasks)
+    super && return unless is_any_params?
     
     @render_params = {include: :tasks}
     @projects = Project.includes(:tasks)
@@ -10,14 +10,22 @@ class ProjectsController < BaseController
   end
   
   def show
-    if params.key?(:with_tasks)
-      render json: Project.find(params[:id]).as_json(include: :tasks)
+    super && return unless is_any_params?
+
+    if params.key?(:task_status) 
+      project = Project.includes(:tasks).where(id: params[:id])
+                     .where(tasks: { status: params[:task_status] }).first
+      render json: project.as_json(include: :tasks)
     else
-      super
+      render json: Project.find(params[:id]).as_json(include: :tasks)
     end
   end
 
   private
+
+  def is_any_params?
+    params.key?(:task_status) || params.key?(:with_tasks)
+  end
 
   def is_status_condition?
     params.key?(:task_status) && Task.validate_status(params[:task_status])

@@ -31,7 +31,10 @@ gem 'bootsnap', '>= 1.4.4', require: false
 gem 'dotenv-rails'
 gem "devise"
 gem "simple_token_authentication"
-
+gem 'rspec-rails'
+gem 'factory_bot_rails'
+gem 'shoulda-matchers', '~>5.0'
+gem 'faker'
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
