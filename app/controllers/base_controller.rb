@@ -1,5 +1,6 @@
 class BaseController < ApplicationController
     protect_from_forgery with: :null_session  # Off CSRF protection
+    acts_as_token_authentication_handler_for User
     before_action :set_resource, only: [:show, :update, :destroy]
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
       
@@ -49,6 +50,12 @@ class BaseController < ApplicationController
   
     def record_not_found
       render json: { error: "Record not found" }, status: :not_found
+    end
+
+    def authenticate_user!
+      unless user_signed_in?
+        render json: { error: 'Unauthorized' }, status: :unauthorized
+      end
     end
   end
   
