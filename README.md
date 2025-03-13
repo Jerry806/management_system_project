@@ -1,4 +1,4 @@
-# Project Management API
+# Management Project API
 
 A RESTful API for managing projects and tasks. This API allows users to create, update, delete, and retrieve projects and tasks with support for filtering tasks by status.
 
@@ -213,7 +213,6 @@ The cache is cleared whenever a project or task is created, updated, or deleted.
 
 
 ## Testing
-Unit Tests
 Unit tests are written using RSpec. You can run them with:
 
 ```bash
