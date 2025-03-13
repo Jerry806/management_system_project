@@ -2,10 +2,12 @@ class BaseController < ApplicationController
     protect_from_forgery with: :null_session  # Off CSRF protection
     acts_as_token_authentication_handler_for User
     before_action :set_resource, only: [:show, :update, :destroy]
+    after_action :clear_cache, only: [:create, :update, :destroy]
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
       
     def index
-      render json: resource_class.all
+      resources = cache_collection { resource_class.all }
+      render json: resources
     end
   
     def show
@@ -33,11 +35,28 @@ class BaseController < ApplicationController
       @resource.destroy
       head :no_content
     end
-  
+      
     private
+
+    def cache_collection
+      Rails.cache.fetch(cache_key, expires_in: 10.minutes) { yield }
+    end
   
+    def cache_key
+      key = "#{controller_name}_collection"
+      key += "_id_#{params[:id]}" if params[:id].present?
+      key += "_status_#{params[:status]}" if params[:status].present?
+      key += "_task_status_#{params[:task_status]}" if params[:task_status].present?
+      key += "_with_tasks_#{params[:with_tasks]}" if params.key?(:with_tasks)
+      key
+    end
+
+    def clear_cache
+      Rails.cache.delete_matched("#{controller_name}_collection")
+    end
+
     def set_resource
-      @resource = resource_class.find(params[:id])
+      @resource = cache_collection { resource_class.find(params[:id]) }
     end
   
     def resource_class

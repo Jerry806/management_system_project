@@ -1,6 +1,6 @@
   class TasksController < BaseController
     def index
-      tasks = Task.where(find_params)
+      tasks = cache_collection { Task.where(find_params) }
       render json: tasks
     end
   

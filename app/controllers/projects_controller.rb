@@ -2,8 +2,8 @@ class ProjectsController < BaseController
   def index
     super && return unless is_any_params?
     
-    @render_params = {include: :tasks}
-    @projects = Project.includes(:tasks)
+    @render_params = { include: :tasks }
+    @projects = cache_collection { Project.includes(:tasks).all }
     select_tasks_by_status if is_status_condition?
 
     render json: @projects.as_json(@render_params)
@@ -13,11 +13,13 @@ class ProjectsController < BaseController
     super && return unless is_any_params?
 
     if params.key?(:task_status) 
-      project = Project.includes(:tasks).where(id: params[:id])
+      project = cache_collection do
+        Project.includes(:tasks).where(id: params[:id])
                      .where(tasks: { status: params[:task_status] }).first
+      end
       render json: project.as_json(include: :tasks)
     else
-      render json: Project.find(params[:id]).as_json(include: :tasks)
+      render json: cache_collection { Project.find(params[:id]) }.as_json(include: :tasks)
     end
   end
 
